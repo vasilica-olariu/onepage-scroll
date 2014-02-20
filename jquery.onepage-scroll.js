@@ -201,7 +201,7 @@
     function responsive() {
       if ($(window).width() < settings.responsiveFallback) {
         $("body").addClass("disabled-onepage-scroll");
-        $(document).unbind('mousewheel DOMMouseScroll');
+        $(document).unbind('mousewheel');
         el.swipeEvents().unbind("swipeDown swipeUp");
       } else {
         if($("body").hasClass("disabled-onepage-scroll")) {
@@ -218,9 +218,9 @@
           el.moveDown();
         });
         
-        $(document).bind('mousewheel DOMMouseScroll', function(event) {
+        $(document).bind('mousewheel', function(event) {
           event.preventDefault();
-          var delta = event.originalEvent.wheelDelta || -event.originalEvent.detail;
+          var delta = event.deltaY;
           init_scroll(event, delta);
         });
       }
@@ -303,9 +303,9 @@
     }
     
     
-    $(document).bind('mousewheel DOMMouseScroll', function(event) {
+    $(document).bind('mousewheel', function(event) {
       event.preventDefault();
-      var delta = event.originalEvent.wheelDelta || -event.originalEvent.detail;
+      var delta = event.deltaY;
       if(!$("body").hasClass("disabled-onepage-scroll")) init_scroll(event, delta);
     });
     
