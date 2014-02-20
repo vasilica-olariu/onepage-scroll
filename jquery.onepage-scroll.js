@@ -27,13 +27,13 @@
     afterMove: null,
     loop: false,
     responsiveFallback: false
-	};
-	
-	/*------------------------------------------------*/
-	/*  Credit: Eike Send for the awesome swipe event */    
-	/*------------------------------------------------*/
-	
-	$.fn.swipeEvents = function() {
+  };
+  
+  /*------------------------------------------------*/
+  /*  Credit: Eike Send for the awesome swipe event */    
+  /*------------------------------------------------*/
+  
+  $.fn.swipeEvents = function() {
       return this.each(function() {
 
         var startX,
@@ -52,6 +52,8 @@
         }
 
         function touchmove(event) {
+          event.preventDefault();
+          
           var touches = event.originalEvent.touches;
           if (touches && touches.length) {
             var deltaX = startX - touches[0].pageX;
@@ -77,7 +79,7 @@
 
       });
     };
-	
+  
 
   $.fn.onepage_scroll = function(options){
     var settings = $.extend({}, defaults, options),
@@ -93,14 +95,9 @@
     $.fn.transformPage = function(settings, pos, index) {
       if (typeof settings.beforeMove == 'function') settings.beforeMove(index);
       $(this).css({
-        "-webkit-transform": "translate3d(0, " + pos + "%, 0)", 
-        "-webkit-transition": "all " + settings.animationTime + "ms " + settings.easing,
-        "-moz-transform": "translate3d(0, " + pos + "%, 0)", 
-        "-moz-transition": "all " + settings.animationTime + "ms " + settings.easing,
-        "-ms-transform": "translate3d(0, " + pos + "%, 0)", 
-        "-ms-transition": "all " + settings.animationTime + "ms " + settings.easing,
-        "transform": "translate3d(0, " + pos + "%, 0)", 
-        "transition": "all " + settings.animationTime + "ms " + settings.easing
+        "top": pos+"px",
+        // 'transition-timing-function': settings.easing,
+        // 'transition-duration': settings.animationTime + 'ms'
       });
       $(this).one('webkitTransitionEnd otransitionend oTransitionEnd msTransitionEnd transitionend', function(e) {
         if (typeof settings.afterMove == 'function') settings.afterMove(index);
@@ -108,8 +105,10 @@
     }
     
     $.fn.moveDown = function() {
-      var el = $(this)
-      index = $(settings.sectionContainer +".active").data("index");
+      var el = $(this), 
+          cSection = $(settings.sectionContainer +".active"),
+          nextSection = cSection.next();
+      index = cSection.data("index");
       current = $(settings.sectionContainer + "[data-index='" + index + "']");
       next = $(settings.sectionContainer + "[data-index='" + (index + 1) + "']");
       if(next.length < 1) {
@@ -121,7 +120,7 @@
         }
         
       }else {
-        pos = (index * 100) * -1;
+        pos = -1*(nextSection.position().top - ($(window).height() - nextSection.outerHeight()));
       }
       if (typeof settings.beforeMove == 'function') settings.beforeMove( next.data("index"));
       current.removeClass("active")
@@ -142,8 +141,10 @@
     }
     
     $.fn.moveUp = function() {
-      var el = $(this)
-      index = $(settings.sectionContainer +".active").data("index");
+      var el = $(this),
+          cSection = $(settings.sectionContainer +".active"),
+          prevSection = cSection.prev();
+      index = cSection.data("index");
       current = $(settings.sectionContainer + "[data-index='" + index + "']");
       next = $(settings.sectionContainer + "[data-index='" + (index - 1) + "']");
       
@@ -156,7 +157,7 @@
           return
         }
       }else {
-        pos = ((next.data("index") - 1) * 100) * -1;
+        pos = -1*(prevSection.position().top - ($(window).height() - prevSection.outerHeight()));
       }
       if (typeof settings.beforeMove == 'function') settings.beforeMove(next.data("index"));
       current.removeClass("active")
@@ -187,7 +188,7 @@
         $("body")[0].className = $("body")[0].className.replace(/\bviewing-page-\d.*?\b/g, '');
         $("body").addClass("viewing-page-"+next.data("index"))
         
-        pos = ((page_index - 1) * 100) * -1;
+        pos = -1*(next.position().top - ($(window).height() - next.outerHeight()));
         
         if (history.replaceState && settings.updateURL == true) {
             var href = window.location.href.substr(0,window.location.href.indexOf('#')) + "#" + (page_index - 1);
@@ -247,10 +248,7 @@
     
     el.addClass("onepage-wrapper").css("position","relative");
     $.each( sections, function(i) {
-      $(this).css({
-        position: "absolute",
-        top: topPos + "%"
-      }).addClass("section").attr("data-index", i+1);
+      $(this).addClass("section").attr("data-index", i+1);
       topPos = topPos + 100;
       if(settings.pagination == true) {
         paginationList += "<li><a data-index='"+(i+1)+"' href='#" + (i+1) + "'></a></li>"
@@ -343,4 +341,3 @@
   
   
 }(window.jQuery);
-
