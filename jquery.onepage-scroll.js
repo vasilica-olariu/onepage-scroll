@@ -81,24 +81,18 @@
     };
   
 
-  function getTransitionEvent(){
-    return (function (WINDOW) { // Munge "window"
-
-        var prefixes = ["", "moz", "webkit", "o"],
-          i = -1, l = prefixes.length, ret = false, vendor;
-
-        while ((i += 1) < l) {
-            vendor = prefixes[i];
-            if (("on" + vendor + "transitionend") in WINDOW) {
-                ret = ((vendor) ? vendor + "T" : "t") + "ransitionEnd";
-                break;
-            }
-        }
-
-        return ret;
-
-    }(window));
-  }
+  var transitionendEvent = (function (WINDOW) {
+    var prefixes = ["", "moz", "webkit", "o"],
+    i = -1, l = prefixes.length, ret = false, vendor;
+    while ((i += 1) < l) {
+      vendor = prefixes[i];
+      if (("on" + vendor + "transitionend") in WINDOW) {
+        ret = vendor ? (vendor + 'T' + 'ransitionEnd') : 'transitionend';
+        break;
+      }
+    }
+    return ret;
+  }(window));
 
   $.fn.onepage_scroll = function(options){
     var settings = $.extend({}, defaults, options),
@@ -114,14 +108,13 @@
     $.fn.transformPage = function(settings, pos, index) {
       if (typeof settings.beforeMove == 'function') settings.beforeMove(index);
       var $this = $(this),
-          transitionEvent = getTransitionEvent(),
           after = function() { 
             (typeof settings.afterMove == 'function') && settings.afterMove(index); 
           };
 
 
-        if(transitionEvent){
-          $this.one(transitionEvent, after);
+        if(transitionendEvent){
+          $this.one(transitionendEvent, after);
           
           $this.css({
             "top": pos+"px",
