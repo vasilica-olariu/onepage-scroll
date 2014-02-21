@@ -81,6 +81,25 @@
     };
   
 
+  function getTransitionEvent(){
+    return (function (WINDOW) { // Munge "window"
+
+        var prefixes = ["", "moz", "webkit", "o"],
+          i = -1, l = prefixes.length, ret = false, vendor;
+
+        while ((i += 1) < l) {
+            vendor = prefixes[i];
+            if (("on" + vendor + "transitionend") in WINDOW) {
+                ret = ((vendor) ? vendor + "T" : "t") + "ransitionEnd";
+                break;
+            }
+        }
+
+        return ret;
+
+    }(window));
+  }
+
   $.fn.onepage_scroll = function(options){
     var settings = $.extend({}, defaults, options),
         el = $(this),
@@ -94,14 +113,28 @@
     
     $.fn.transformPage = function(settings, pos, index) {
       if (typeof settings.beforeMove == 'function') settings.beforeMove(index);
-      $(this).css({
-        "top": pos+"px",
-        // 'transition-timing-function': settings.easing,
-        // 'transition-duration': settings.animationTime + 'ms'
-      });
-      $(this).one('webkitTransitionEnd otransitionend oTransitionEnd msTransitionEnd transitionend', function(e) {
-        if (typeof settings.afterMove == 'function') settings.afterMove(index);
-      });
+      var $this = $(this),
+          transitionEvent = getTransitionEvent(),
+          after = function() { 
+            (typeof settings.afterMove == 'function') && settings.afterMove(index); 
+          };
+
+
+        if(transitionEvent){
+          $this.one(transitionEvent, after);
+          
+          $this.css({
+            "top": pos+"px",
+            'transition-timing-function': settings.easing,
+            'transition-duration': settings.animationTime + 'ms'
+          });
+        } else {
+          $this.animate({ top: pos+"px"}, {
+            duration: settings.animationTime,
+            // easing: settings.easing,
+            complete: after
+          });
+        }
     }
     
     $.fn.moveDown = function() {
