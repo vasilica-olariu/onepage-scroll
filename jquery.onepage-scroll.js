@@ -330,7 +330,7 @@
     
     
     $(document).bind('mousewheel', function(event) {
-      event.preventDefault();
+      //event.preventDefault();
       var delta = event.deltaY;
       if(!$("body").hasClass("disabled-onepage-scroll")) init_scroll(event, delta);
     });
